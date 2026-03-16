@@ -2,6 +2,8 @@
 
 A production-grade Network Intrusion Detection System combining **XGBoost ML** with **Large Language Models (LLMs)** for adaptive, explainable threat detection — with immutable **blockchain threat logging** and a real-time cybersecurity dashboard.
 
+![Dashboard](dashboard.png)
+
 ---
 
 ## 🚀 Features
@@ -154,6 +156,10 @@ The hybrid detector supports three LLM providers. Set `LLM_PROVIDER` in your `.e
 | **XGBoost** ⭐ | 98.5% | 98.5% | 99.7% |
 | SVM | 96.2% | 96.2% | 98.1% |
 | Logistic Regression | 89.2% | 89.2% | 94.3% |
+
+| Model Comparison | Confusion Matrix |
+|---|---|
+| ![Model Comparison](model_comparison.png) | ![Confusion Matrix](confusion_matrix.png) |
 
 ---
 
