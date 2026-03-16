@@ -1,0 +1,8 @@
+# This file keeps the models/ directory tracked by Git.
+# Trained model binaries (.pkl) are excluded via .gitignore and must be generated locally.
+#
+# To regenerate:
+#   python src/preprocessing.py   # must run first
+#   python src/model_training.py  # creates best_model.pkl, model_results.json
+#
+# model_results.json IS committed — it stores evaluation metrics without the binary weights.

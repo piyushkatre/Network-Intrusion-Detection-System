@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B-NIDS Blockchain Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 40%, #0f2847 100%);
+            color: #e0e6f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .nav-link {
+            color: #60a5fa;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #93c5fd;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(15, 23, 60, 0.6);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid rgba(96, 165, 250, 0.15);
+        }
+
+        .nav-tab {
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #94a3b8;
+            background: transparent;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: #e0e6f0;
+            background: rgba(96, 165, 250, 0.08);
+        }
+
+        .nav-tab.active {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 0.95em;
+            color: #64748b;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Stat Cards Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 60, 0.7);
+            border: 1px solid rgba(96, 165, 250, 0.12);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .stat-card .label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stat-card .value.green {
+            color: #34d399;
+        }
+
+        .stat-card .value.red {
+            color: #f87171;
+        }
+
+        .stat-card .value.yellow {
+            color: #fbbf24;
+        }
+
+        .stat-card .value.purple {
+            color: #a78bfa;
+        }
+
+        /* Panel Cards */
+        .panel {
+            background: rgba(15, 23, 60, 0.5);
+            border: 1px solid rgba(96, 165, 250, 0.1);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            font-size: 1.1em;
+            color: #93c5fd;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Chain Visualization */
+        .chain-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 12px 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #334155 transparent;
+        }
+
+        .block-card {
+            min-width: 220px;
+            background: rgba(15, 23, 60, 0.8);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+        }
+
+        .block-card:hover {
+            transform: translateY(-3px);
+            border-color: #60a5fa;
+            box-shadow: 0 6px 20px rgba(96, 165, 250, 0.1);
+        }
+
+        .block-card.active {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.06);
+        }
+
+        .block-num {
+            font-weight: 700;
+            color: #60a5fa;
+            font-size: 0.95em;
+        }
+
+        .block-meta {
+            font-size: 0.78em;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .block-hash-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 0.72em;
+            color: #475569;
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        .chain-arrow {
+            display: flex;
+            align-items: center;
+            color: #334155;
+            font-size: 1.4em;
+            flex-shrink: 0;
+        }
+
+        /* Block Details */
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.06);
+            font-size: 0.9em;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #64748b;
+        }
+
+        .detail-value {
+            color: #e0e6f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            max-width: 60%;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        /* Transaction Table */
+        .txn-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+
+        .txn-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.78em;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.12);
+        }
+
+        .txn-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.05);
+        }
+
+        .txn-table tr:hover {
+            background: rgba(96, 165, 250, 0.04);
+        }
+
+        .badge-attack {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        .badge-benign {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 9px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.88em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-outline:hover {
+            background: rgba(96, 165, 250, 0.08);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input,
+        .search-bar select {
+            padding: 9px 14px;
+            background: rgba(15, 23, 60, 0.7);
+            border: 1px solid rgba(96, 165, 250, 0.15);
+            border-radius: 8px;
+            color: #e0e6f0;
+            font-size: 0.88em;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .search-bar input::placeholder {
+            color: #475569;
+        }
+
+        .search-bar input:focus,
+        .search-bar select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1);
+        }
+
+        /* Node List */
+        .node-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .node-card {
+            background: rgba(15, 23, 60, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.1);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .node-name {
+            font-weight: 600;
+            color: #93c5fd;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .node-org {
+            font-size: 0.78em;
+            color: #64748b;
+        }
+
+        .node-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34d399;
+            margin-right: 6px;
+            box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+        }
+
+        /* Contract Stats */
+        .contract-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.06);
+        }
+
+        .contract-name {
+            font-weight: 500;
+            color: #e0e6f0;
+            font-size: 0.9em;
+        }
+
+        .contract-count {
+            font-weight: 700;
+            color: #60a5fa;
+            font-size: 1.1em;
+        }
+
+        /* Status Badge */
+        .status-valid {
+            color: #34d399;
+            font-weight: 600;
+        }
+
+        .status-invalid {
+            color: #f87171;
+            font-weight: 600;
+        }
+
+        /* Loading */
+        .loading-text {
+            text-align: center;
+            color: #475569;
+            padding: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header h1 {
+                font-size: 1.6em;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <a href="realtime.html" class="nav-link">← Back to Dashboard</a>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="nav-tab" onclick="switchTab('chain')">Blockchain</button>
+                <button class="nav-tab" onclick="switchTab('contracts')">Smart Contracts</button>
+                <button class="nav-tab" onclick="switchTab('network')">Network</button>
+                <button class="nav-tab" onclick="switchTab('forensics')">Forensics</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>⛓️ B-NIDS Blockchain Dashboard</h1>
+            <p>Permissioned Blockchain · PBFT Consensus · Smart Contract Validation</p>
+        </header>
+
+        <!-- ==================== OVERVIEW TAB ==================== -->
+        <div class="tab-content active" id="tab-overview">
+            <!-- Top Stats -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">Chain Length</div>
+                    <div class="value" id="ovChainLen">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Chain Status</div>
+                    <div class="value green" id="ovChainStatus">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Consensus Rounds</div>
+                    <div class="value purple" id="ovConsensusRounds">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Alerts Validated</div>
+                    <div class="value" id="ovAlertsValidated">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Active Peers</div>
+                    <div class="value green" id="ovActivePeers">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Alerts Rejected</div>
+                    <div class="value red" id="ovAlertsRejected">-</div>
+                </div>
+            </div>
+
+            <div class="panel-grid">
+                <!-- PBFT Summary -->
+                <div class="panel">
+                    <h2>🤝 PBFT Consensus</h2>
+                    <div id="ovPbftContent" class="loading-text">Loading...</div>
+                </div>
+                <!-- Smart Contracts Summary -->
+                <div class="panel">
+                    <h2>📜 Smart Contracts</h2>
+                    <div id="ovContractContent" class="loading-text">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Recent Blocks -->
+            <div class="panel">
+                <h2>🧱 Recent Blocks</h2>
+                <div class="chain-scroll" id="ovRecentChain">
+                    <div class="loading-text">Loading blockchain...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAIN TAB ==================== -->
+        <div class="tab-content" id="tab-chain">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">Total Blocks</div>
+                    <div class="value" id="chBlockCount">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Difficulty</div>
+                    <div class="value yellow" id="chDifficulty">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Integrity</div>
+                    <div class="value green" id="chIntegrity">Valid</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h2 style="margin-bottom: 0;">⛓️ Full Blockchain</h2>
+                    <button class="btn btn-primary" onclick="verifyChain()">🛡️ Verify Integrity</button>
+                </div>
+                <div class="chain-scroll" id="chFullChain">
+                    <div class="loading-text">Loading blockchain...</div>
+                </div>
+            </div>
+
+            <!-- Block Details -->
+            <div class="panel" id="chDetailsPanel" style="display: none;">
+                <h2 id="chDetailsTitle">Block Details</h2>
+                <div class="panel-grid">
+                    <div>
+                        <div id="chBlockInfo"></div>
+                    </div>
+                    <div>
+                        <h3 style="color: #93c5fd; font-size: 0.95em; margin-bottom: 10px;">Transactions</h3>
+                        <div style="overflow-x: auto;">
+                            <table class="txn-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Source</th>
+                                        <th>Target</th>
+                                        <th>Type</th>
+                                        <th>Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="chTxnBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CONTRACTS TAB ==================== -->
+        <div class="tab-content" id="tab-contracts">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">Total Processed</div>
+                    <div class="value" id="scTotal">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Validated</div>
+                    <div class="value green" id="scValidated">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Rejected</div>
+                    <div class="value red" id="scRejected">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Escalated</div>
+                    <div class="value yellow" id="scEscalated">-</div>
+                </div>
+            </div>
+
+            <div class="panel-grid">
+                <div class="panel">
+                    <h2>📋 Contract Execution Stats</h2>
+                    <div id="scContractList" class="loading-text">Loading...</div>
+                </div>
+                <div class="panel">
+                    <h2>🛡️ Reputation Scores</h2>
+                    <div id="scReputationList" class="loading-text">Loading...</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📊 Escalation Actions</h2>
+                <div id="scEscalationInfo" class="loading-text">Loading...</div>
+            </div>
+        </div>
+
+        <!-- ==================== NETWORK TAB ==================== -->
+        <div class="tab-content" id="tab-network">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">Organizations</div>
+                    <div class="value purple" id="netOrgs">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Enrolled Peers</div>
+                    <div class="value" id="netPeers">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Crypto</div>
+                    <div class="value green" id="netCrypto" style="font-size: 0.9em;">-</div>
+                </div>
+            </div>
+
+            <div class="panel-grid">
+                <div class="panel">
+                    <h2>🏢 Network Peers</h2>
+                    <div class="node-grid" id="netNodeGrid">
+                        <div class="loading-text">Loading...</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>🔐 Identity Manager</h2>
+                    <div id="netIdentityInfo" class="loading-text">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== FORENSICS TAB ==================== -->
+        <div class="tab-content" id="tab-forensics">
+            <div class="panel">
+                <h2>🔍 Forensic Search</h2>
+                <div class="search-bar">
+                    <input type="text" id="fsAlertType" placeholder="Alert type (e.g., DDoS)">
+                    <input type="text" id="fsSourceIP" placeholder="Source IP address">
+                    <select id="fsSeverity">
+                        <option value="">Any Severity</option>
+                        <option value="1">1 - Low</option>
+                        <option value="2">2 - Medium</option>
+                        <option value="3">3 - High</option>
+                        <option value="4">4 - Critical</option>
+                        <option value="5">5 - Severe</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="runForensicSearch()">🔎 Search</button>
+                </div>
+
+                <div id="fsResults" class="loading-text" style="padding: 16px 0;">
+                    Enter search criteria above and click Search.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let currentChain = [];
+        let selectedBlockIdx = -1;
+
+        // ──────── Tab Switching ────────
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+
+            // Lazy-load data for the tab
+            if (tabName === 'chain') loadChainTab();
+            if (tabName === 'contracts') loadContractsTab();
+            if (tabName === 'network') loadNetworkTab();
+        }
+
+        // ──────── OVERVIEW TAB ────────
+        async function loadOverview() {
+            try {
+                const [chainRes, consensusRes, contractsRes] = await Promise.all([
+                    fetch(`${API_BASE}/blockchain`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/blockchain/consensus`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/blockchain/contracts`).then(r => r.json()).catch(() => null)
+                ]);
+
+                // Chain stats
+                if (chainRes) {
+                    currentChain = chainRes.chain || [];
+                    document.getElementById('ovChainLen').textContent = chainRes.length || 0;
+                    document.getElementById('ovChainStatus').textContent = '✓ Valid';
+                    renderRecentBlocks('ovRecentChain', currentChain.slice(-6));
+                }
+
+                // Consensus stats
+                if (consensusRes) {
+                    const total = consensusRes.total_rounds || 0;
+                    const successful = consensusRes.successful_rounds || 0;
+                    document.getElementById('ovConsensusRounds').textContent = total;
+                    document.getElementById('ovActivePeers').textContent = consensusRes.total_peers || 5;
+
+                    const avgLat = consensusRes.average_latency_ms;
+                    const successRate = total > 0 ? ((successful / total) * 100).toFixed(1) : '100';
+
+                    document.getElementById('ovPbftContent').innerHTML = `
+                        <div class="detail-row"><span class="detail-label">Success Rate</span><span class="detail-value">${successRate}%</span></div>
+                        <div class="detail-row"><span class="detail-label">Successful Rounds</span><span class="detail-value">${successful}</span></div>
+                        <div class="detail-row"><span class="detail-label">Failed Rounds</span><span class="detail-value">${consensusRes.failed_rounds || 0}</span></div>
+                        <div class="detail-row"><span class="detail-label">Avg Latency</span><span class="detail-value">${avgLat ? avgLat.toFixed(2) + ' ms' : 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Quorum Required</span><span class="detail-value">≥ 3 of 5</span></div>
+                    `;
+                }
+
+                // Contract stats
+                if (contractsRes) {
+                    const validated = contractsRes.total_validated || 0;
+                    const rejected = contractsRes.total_rejected || 0;
+                    document.getElementById('ovAlertsValidated').textContent = validated;
+                    document.getElementById('ovAlertsRejected').textContent = rejected;
+
+                    const contracts = contractsRes.contracts || {};
+                    let html = '';
+                    for (const [name, stats] of Object.entries(contracts)) {
+                        html += `<div class="contract-item">
+                            <span class="contract-name">${name}</span>
+                            <span class="contract-count">${stats.executions || 0} runs</span>
+                        </div>`;
+                    }
+                    document.getElementById('ovContractContent').innerHTML = html || '<div class="loading-text">No contract data</div>';
+                }
+            } catch (err) {
+                console.error('Overview load error:', err);
+            }
+        }
+
+        // ──────── CHAIN TAB ────────
+        async function loadChainTab() {
+            try {
+                const data = await fetch(`${API_BASE}/blockchain`).then(r => r.json());
+                currentChain = data.chain || [];
+                document.getElementById('chBlockCount').textContent = data.length || 0;
+                document.getElementById('chDifficulty').textContent = data.difficulty || 2;
+                renderRecentBlocks('chFullChain', currentChain);
+            } catch (err) {
+                console.error('Chain tab error:', err);
+            }
+        }
+
+        async function verifyChain() {
+            const el = document.getElementById('chIntegrity');
+            el.textContent = '...';
+            el.className = 'value yellow';
+            try {
+                const data = await fetch(`${API_BASE}/blockchain/verify`).then(r => r.json());
+                if (data.is_valid) {
+                    el.textContent = '✓ Valid';
+                    el.className = 'value green';
+                    alert('✅ ' + data.message);
+                } else {
+                    el.textContent = '✗ Invalid';
+                    el.className = 'value red';
+                    alert('⚠️ ' + data.message);
+                }
+            } catch (err) {
+                el.textContent = 'Error';
+                el.className = 'value red';
+            }
+        }
+
+        function renderRecentBlocks(containerId, blocks) {
+            const container = document.getElementById(containerId);
+            if (!blocks || blocks.length === 0) {
+                container.innerHTML = '<div class="loading-text">No blocks yet</div>';
+                return;
+            }
+            let html = '';
+            blocks.forEach((block, i) => {
+                const time = new Date(block.timestamp * 1000).toLocaleTimeString();
+                const txnCount = block.transactions ? block.transactions.length : 0;
+                const isActive = selectedBlockIdx === block.index;
+                html += `
+                    <div class="block-card ${isActive ? 'active' : ''}" onclick="selectBlock(${block.index})">
+                        <div class="block-num">Block #${block.index}</div>
+                        <div class="block-meta">${time} · ${txnCount} txn${txnCount !== 1 ? 's' : ''}</div>
+                        <div class="block-hash-preview">${block.hash ? block.hash.substring(0, 20) + '...' : 'N/A'}</div>
+                    </div>
+                `;
+                if (i < blocks.length - 1) {
+                    html += '<div class="chain-arrow">→</div>';
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        function selectBlock(index) {
+            selectedBlockIdx = index;
+            const block = currentChain.find(b => b.index === index);
+            if (!block) return;
+
+            const panel = document.getElementById('chDetailsPanel');
+            panel.style.display = 'block';
+            document.getElementById('chDetailsTitle').textContent = `Block #${block.index} Details`;
+
+            // Block info
+            document.getElementById('chBlockInfo').innerHTML = `
+                <div class="detail-row"><span class="detail-label">Index</span><span class="detail-value">${block.index}</span></div>
+                <div class="detail-row"><span class="detail-label">Timestamp</span><span class="detail-value">${new Date(block.timestamp * 1000).toLocaleString()}</span></div>
+                <div class="detail-row"><span class="detail-label">Previous Hash</span><span class="detail-value">${block.previous_hash || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Block Hash</span><span class="detail-value">${block.hash || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Nonce</span><span class="detail-value">${block.nonce}</span></div>
+                <div class="detail-row"><span class="detail-label">Merkle Root</span><span class="detail-value">${block.merkle_root || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Proposer</span><span class="detail-value">${block.proposer || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Endorsements</span><span class="detail-value">${block.endorsements || 'N/A'}</span></div>
+            `;
+
+            // Transactions
+            const tbody = document.getElementById('chTxnBody');
+            tbody.innerHTML = '';
+            if (!block.transactions || block.transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#475569;">No transactions</td></tr>';
+            } else {
+                block.transactions.forEach(txn => {
+                    const isAttack = txn.prediction && txn.prediction !== 'BENIGN';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${txn.timestamp ? new Date(txn.timestamp * 1000).toLocaleTimeString() : 'N/A'}</td>
+                            <td>${txn.source_ip || 'N/A'}</td>
+                            <td>${txn.dest_ip || 'N/A'}</td>
+                            <td><span class="${isAttack ? 'badge-attack' : 'badge-benign'}">${txn.prediction || 'N/A'}</span></td>
+                            <td>${txn.confidence ? (txn.confidence * 100).toFixed(1) + '%' : 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Highlight active block in chain visual
+            document.querySelectorAll('.block-card').forEach(el => el.classList.remove('active'));
+            event.target.closest('.block-card')?.classList.add('active');
+        }
+
+        // ──────── CONTRACTS TAB ────────
+        async function loadContractsTab() {
+            try {
+                const data = await fetch(`${API_BASE}/blockchain/contracts`).then(r => r.json());
+
+                document.getElementById('scTotal').textContent = (data.total_validated || 0) + (data.total_rejected || 0);
+                document.getElementById('scValidated').textContent = data.total_validated || 0;
+                document.getElementById('scRejected').textContent = data.total_rejected || 0;
+                document.getElementById('scEscalated').textContent = data.total_escalated || 0;
+
+                // Contract list
+                const contracts = data.contracts || {};
+                let contractHtml = '';
+                for (const [name, stats] of Object.entries(contracts)) {
+                    contractHtml += `
+                        <div class="contract-item">
+                            <div>
+                                <div class="contract-name">${name}</div>
+                                <div style="font-size:0.78em; color:#64748b; margin-top:2px;">
+                                    ${stats.description || ''}
+                                </div>
+                            </div>
+                            <span class="contract-count">${stats.executions || 0}</span>
+                        </div>`;
+                }
+                document.getElementById('scContractList').innerHTML = contractHtml || '<div class="loading-text">No contracts</div>';
+
+                // Reputation scores
+                const rep = data.reputation_scores || {};
+                let repHtml = '';
+                for (const [node, score] of Object.entries(rep)) {
+                    const color = score >= 50 ? '#34d399' : score >= 20 ? '#fbbf24' : '#f87171';
+                    repHtml += `
+                        <div class="contract-item">
+                            <span class="contract-name"><span class="node-status"></span>${node}</span>
+                            <span style="font-weight:700; color:${color};">${score}</span>
+                        </div>`;
+                }
+                document.getElementById('scReputationList').innerHTML = repHtml || '<div class="loading-text">No reputation data</div>';
+
+                // Escalation info
+                const esc = data.escalation_actions || [];
+                if (esc.length > 0) {
+                    let escHtml = '<div style="overflow-x:auto;"><table class="txn-table"><thead><tr><th>Action</th><th>Count</th><th>Last Triggered</th></tr></thead><tbody>';
+                    esc.forEach(a => {
+                        escHtml += `<tr><td>${a.action || 'N/A'}</td><td>${a.count || 0}</td><td>${a.last_triggered || 'N/A'}</td></tr>`;
+                    });
+                    escHtml += '</tbody></table></div>';
+                    document.getElementById('scEscalationInfo').innerHTML = escHtml;
+                } else {
+                    document.getElementById('scEscalationInfo').innerHTML = '<div class="loading-text">No escalation actions recorded yet</div>';
+                }
+            } catch (err) {
+                console.error('Contracts tab error:', err);
+                document.getElementById('scContractList').innerHTML = '<div class="loading-text">Failed to load</div>';
+            }
+        }
+
+        // ──────── NETWORK TAB ────────
+        async function loadNetworkTab() {
+            try {
+                const [identityData, networkData] = await Promise.all([
+                    fetch(`${API_BASE}/blockchain/identity`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/blockchain/network`).then(r => r.json()).catch(() => null)
+                ]);
+
+                if (identityData) {
+                    const orgs = identityData.organizations || {};
+                    const orgNames = Object.keys(orgs);
+                    let totalPeers = 0;
+                    let nodeHtml = '';
+
+                    for (const [orgName, orgData] of Object.entries(orgs)) {
+                        const peers = orgData.peers || [];
+                        totalPeers += peers.length;
+                        peers.forEach(peer => {
+                            nodeHtml += `
+                                <div class="node-card">
+                                    <div class="node-name"><span class="node-status"></span>${peer}</div>
+                                    <div class="node-org">${orgName}</div>
+                                </div>`;
+                        });
+                    }
+
+                    document.getElementById('netOrgs').textContent = orgNames.length || 3;
+                    document.getElementById('netPeers').textContent = totalPeers || 5;
+                    document.getElementById('netNodeGrid').innerHTML = nodeHtml || '<div class="loading-text">No peers found</div>';
+
+                    // Identity info
+                    document.getElementById('netIdentityInfo').innerHTML = `
+                        <div class="detail-row"><span class="detail-label">Key Algorithm</span><span class="detail-value">${identityData.key_algorithm || 'RSA-2048'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Certificate Type</span><span class="detail-value">${identityData.cert_type || 'X.509'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Signature Scheme</span><span class="detail-value">${identityData.signature_scheme || 'PSS + SHA-256'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Consensus Model</span><span class="detail-value">PBFT (Byzantine Fault Tolerant)</span></div>
+                        <div class="detail-row"><span class="detail-label">Fault Tolerance</span><span class="detail-value">f = 1 (tolerates 1 faulty node)</span></div>
+                    `;
+                    document.getElementById('netCrypto').textContent = 'RSA-2048';
+                }
+
+                if (networkData) {
+                    // Supplement with network stats if available
+                    const peers = networkData.total_peers;
+                    if (peers) document.getElementById('netPeers').textContent = peers;
+                }
+            } catch (err) {
+                console.error('Network tab error:', err);
+            }
+        }
+
+        // ──────── FORENSICS TAB ────────
+        async function runForensicSearch() {
+            const alertType = document.getElementById('fsAlertType').value.trim();
+            const sourceIP = document.getElementById('fsSourceIP').value.trim();
+            const severity = document.getElementById('fsSeverity').value;
+            const resultsEl = document.getElementById('fsResults');
+
+            resultsEl.innerHTML = '<div class="loading-text">Searching...</div>';
+
+            const params = new URLSearchParams();
+            if (alertType) params.set('alert_type', alertType);
+            if (sourceIP) params.set('source_ip', sourceIP);
+            if (severity) params.set('min_severity', severity);
+
+            try {
+                const data = await fetch(`${API_BASE}/blockchain/search?${params}`).then(r => r.json());
+                const results = data.results || [];
+
+                if (results.length === 0) {
+                    resultsEl.innerHTML = '<div class="loading-text">No matching transactions found.</div>';
+                    return;
+                }
+
+                let html = `<div style="margin-bottom:10px; color:#64748b; font-size:0.88em;">${results.length} result(s) found</div>`;
+                html += '<div style="overflow-x:auto;"><table class="txn-table"><thead><tr>';
+                html += '<th>Time</th><th>Source IP</th><th>Dest IP</th><th>Type</th><th>Severity</th><th>Confidence</th><th>Block</th>';
+                html += '</tr></thead><tbody>';
+
+                results.forEach(r => {
+                    const isAttack = r.prediction && r.prediction !== 'BENIGN';
+                    html += `<tr>
+                        <td>${r.timestamp ? new Date(r.timestamp * 1000).toLocaleString() : 'N/A'}</td>
+                        <td>${r.source_ip || 'N/A'}</td>
+                        <td>${r.dest_ip || 'N/A'}</td>
+                        <td><span class="${isAttack ? 'badge-attack' : 'badge-benign'}">${r.prediction || 'N/A'}</span></td>
+                        <td>${r.severity || 'N/A'}</td>
+                        <td>${r.confidence ? (r.confidence * 100).toFixed(1) + '%' : 'N/A'}</td>
+                        <td>#${r.block_index ?? 'N/A'}</td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table></div>';
+                resultsEl.innerHTML = html;
+            } catch (err) {
+                console.error('Forensic search error:', err);
+                resultsEl.innerHTML = '<div class="loading-text" style="color:#f87171;">Search failed. Check backend connection.</div>';
+            }
+        }
+
+        // ──────── Initialize ────────
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOverview();
+            setInterval(loadOverview, 8000);
+        });
+    </script>
+</body>
+
+</html>

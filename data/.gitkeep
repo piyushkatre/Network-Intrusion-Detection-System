@@ -1,0 +1,7 @@
+# This file keeps the data/ directory tracked by Git.
+# Large dataset files (.npy, .csv) and trained artifacts (.pkl) are excluded via .gitignore
+# and must be generated locally.
+#
+# To regenerate:
+#   python src/preprocessing.py   # creates X_train.npy, y_train.npy, scaler.pkl, etc.
+#   python src/model_training.py  # creates models/best_model.pkl

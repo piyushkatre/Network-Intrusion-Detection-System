@@ -1,0 +1,27 @@
+graph LR
+    A["Network<br/>Traffic"] --> B["ML<br/>Detection"]
+    B -->|"Threat"| C["Smart<br/>Contracts"]
+    C --> D["Off-Chain<br/>Store"]
+    D -->|"Hash"| E["PBFT<br/>Consensus"]
+    E --> F["Permissioned<br/>Blockchain"]
+    F --> G["Web<br/>Dashboard"]
+
+    H["Identity<br/>Manager"] -.->|"Auth"| E
+    H -.->|"Sign"| F
+
+    classDef blue fill:#dbeafe,stroke:#2563eb,color:#1e3a5f
+    classDef orange fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef green fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef purple fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef red fill:#ffe4e6,stroke:#e11d48,color:#881337
+    classDef teal fill:#ccfbf1,stroke:#0d9488,color:#134e4a
+    classDef yellow fill:#fef9c3,stroke:#ca8a04,color:#713f12
+
+    class A green
+    class B blue
+    class C orange
+    class D green
+    class E purple
+    class F red
+    class G teal
+    class H yellow
